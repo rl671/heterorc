@@ -33,11 +33,4 @@ The repository is logically divided into core functional modules and experiment 
 - **Figure 5**: Group-level interpretation via sensor-space matching for both BCI and Attentional Priority datasets.
 - **Figure S2**: Performance comparison against Wavelet and Filter-Hilbert transformations (`FigS2_Wavelet_cmp_simu.py`).
 
----
 
-## ⚙️ Installation & Requirements
-
-1. Clone this repository:
-   ```bash
-   git clone [https://github.com/YourUsername/HeteroRC-EEG-Decoding.git](https://github.com/YourUsername/HeteroRC-EEG-Decoding.git)
-   cd HeteroRC-EEG-Decoding
