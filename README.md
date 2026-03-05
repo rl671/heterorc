@@ -39,5 +39,5 @@ The repository is logically divided into core functional modules and experiment 
 
 1. Clone this repository:
    ```bash
-   git clone [https://github.com/YourUsername/HeteroRC-EEG-Decoding.git](https://github.com/YourUsername/HeteroRC-EEG-Decoding.git)
-   cd HeteroRC-EEG-Decoding
+   git clone [https://github.com/rl671/heterorc.git](https://github.com/rl671/heterorc.git)
+   cd heterorc
