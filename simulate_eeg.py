@@ -59,7 +59,7 @@ frontal_idxs = [
     i for i, name in enumerate(CH_NAMES)
     if name.startswith('F')
 ]
-print(f"Posterior Channels ({len(posterior_idxs)}): {[CH_NAMES[i] for i in posterior_idxs]}")
+# print(f"Posterior Channels ({len(posterior_idxs)}): {[CH_NAMES[i] for i in posterior_idxs]}")
 
 
 # ===================== Helpers =====================

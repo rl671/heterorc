@@ -8,18 +8,19 @@ of a Heterogeneous Reservoir Computing (HeteroRC) model, specifically designed
 for EEG/MEG analysis.
 
 It moves beyond "black box" prediction by converting reservoir states back into 
-interpretable physiological domains using the Haufe Transform and Clustering.
-
+interpretable physiological domains at both the **individual** and **group** levels.
 Key Features:
 -------------
 1. **Haufe Transform**: Converts uninterpretable classifier weights (backward model) 
    into activation patterns (forward model), identifying which reservoir units 
    encode class-discriminative information.
-2. **Ward Clustering**: Groups the most important reservoir units based on their 
-   temporal dynamics, identifying functional "sub-networks" within the reservoir.
-3. **Virtual Sources**: Constructs a representative time-series signal for each 
-   cluster, effectively acting as a non-linear source separation algorithm.
-4. **Multi-View Visualization**: Generates a composite figure for each virtual source:
+2. **Individual-Level Clustering**: Groups the most important reservoir units based on 
+   their latent temporal dynamics to extract subject-specific virtual source signals.
+3. **Group-Level Sensor-Space Matching**: Projects unit activities to a common physical 
+   sensor space, aligns their spatial polarities, and performs global clustering across 
+   multiple participants to reconstruct consistent, grand-average neural motifs.
+4. **Multi-View Visualization**: Generates a composite figure for each virtual source 
+   (Individual or Grand-Average):
    - **ERP**: Event-Related Potentials (Time domain).
    - **TFR**: Time-Frequency Representations (Time-Frequency domain).
    - **PSD**: Power Spectral Density with FOOOF parameterization (Frequency domain).
@@ -34,22 +35,17 @@ Dependencies:
 
 Usage:
 ------
-    from heterorc_interpretation import analyze_dynamics
+    from heterorc_interpretation import analyze_dynamics, analyze_dynamics_group
     
-    results = analyze_dynamics(
-        esn=my_esn_model,
-        classifier=my_readout_layer,
-        target_time=0.35,  # Time of peak accuracy
-        state_snapshot=states_matrix,
-        y_labels=ground_truth,
-        times=epoch_times,
-        inline_topomaps=True,
-        info=mne_info,
-        raw_X_snapshot=raw_eeg_data
+    # 1. Individual-level Interpretation
+    results_ind = analyze_dynamics(
+        esn=my_esn, classifier=my_clf, target_time=0.35, ...
     )
-
-New - group-level interpretation.
-
+    
+    # 2. Group-level Interpretation
+    results_grp = analyze_dynamics_group(
+        subject_data_list=all_subjects_data, info=mne_info, top_n=10, ...
+    )
 """
 
 import os
@@ -768,6 +764,38 @@ def analyze_dynamics(
 # =============================================================================
 #  GROUP-LEVEL DYNAMICS (Spatial Matching & Sign-Alignment)
 # =============================================================================
+
+"""
+    Group-Level Analysis Function. 
+    Performs cross-subject spatial matching, sign-alignment, and constructs 
+    Grand Average representations (ERP, TFR, PSD, Topo).
+
+    Parameters
+    ----------
+    subject_data_list : list of dict
+        A list where each element represents one participant and contains:
+        - 'X': Raw sensor data (n_epochs, n_channels, n_times)
+        - 'S': Reservoir states (n_epochs, n_neurons, n_times)
+        - 'y': Labels (n_epochs,)
+        - 'times': Time vector
+        - 'target_time': Target time for feature extraction (e.g., peak decoding time)
+        - 'classifier': Trained linear readout model
+        - 'esn': The trained HeteroRC instance
+    info : mne.Info
+        MNE Info object containing sensor locations, required for topomaps.
+    n_clusters : int
+        Number of global spatial clusters to extract.
+    top_n : int
+        Number of most informative units to extract per participant.
+    ... (refer to individual-level analysis)
+
+    Returns
+    -------
+    results_out : dict (if return_results=True)
+        A dictionary containing group-level metadata, grand-average cluster metrics, 
+        and the final figure handle.
+"""
+
 def analyze_dynamics_group(
     subject_data_list,
     info,
@@ -866,6 +894,9 @@ def analyze_dynamics_group(
             cov_map = (X_flat @ S_flat) / (len(S_flat) - 1)
             
             # Sign Alignment
+            # Reservoir units have arbitrary polarities. We align all spatial 
+            # patterns so their maximum absolute amplitude is positive, preventing 
+            # signal cancellation when pooling across subjects.
             max_idx = np.argmax(np.abs(cov_map))
             s_flip = 1.0 if cov_map[max_idx] > 0 else -1.0
             cov_map_aligned = cov_map * s_flip
@@ -968,6 +999,8 @@ def analyze_dynamics_group(
             S_virt_sub = np.zeros((sub['S'].shape[0], sub['S'].shape[2]))
             
             for n_idx, s_flip in zip(idxs, s_flips):
+                # Retrieve the original Haufe weight and apply the spatial sign-flip 
+                # to ensure the temporal dynamics match the aligned topomap.
                 w = sub['haufe'][n_idx, np.argmax(np.abs(sub['haufe'][n_idx]))]
                 S_virt_sub += w * s_flip * sub['S'][:, n_idx, :]
             S_virt_sub /= len(idxs)
@@ -1123,7 +1156,7 @@ def analyze_dynamics_group(
     plt.show()
 
     # ---------------------------------------------------------------------
-    # NEW: Workspace export 
+    # Workspace export 
     # ---------------------------------------------------------------------
     if return_results:
         results_out = {
