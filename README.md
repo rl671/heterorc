@@ -1,22 +1,25 @@
-# HeteroRC: Interpretable Heterogeneous Reservoir Computing for Neural Decoding
+# HeteroRC: Interpretable Heterogeneous Reservoir Computing for Neural Time-Series Decoding
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**HeteroRC** is a biologically inspired and interpretable decoding framework designed to extract latent information from dynamic neural responses (e.g., EEG, MEG, LFPs). 
+Welcome to the official repository for **HeteroRC**, a biologically inspired and interpretable decoding framework for dynamic neural responses (EEG/MEG/LFPs).
 
-Conventional linear decoders operating on instantaneous amplitude signals effectively capture phase-locked, evoked responses, but they often fail to recover information embedded in nonlinear, non-phase-locked dynamics. **HeteroRC** overcomes this by projecting raw neural time series into a high-dimensional recurrent state space with diverse intrinsic time constants, mimicking the ability of neural populations to integrate multiscale dynamics. 
+HeteroRC is designed to overcome the core limitations of conventional decoding pipelines in cognitive neuroscience, offering three major advantages :
 
-Crucially, HeteroRC operates directly on raw neural time series without requiring explicit feature engineering, and it includes a robust interpretability framework to map latent reservoir dynamics back to physiological virtual sources and sensor-space topographies.
+1. ⚡ **Direct Decoding on Raw Time-Series:** It operates strictly on raw, multichannel time-series data. Absolutely no prior transformation, frequency filtering, or manual feature engineering is required. 
+2. 🧠 **Sensitivity to Diverse Neural Dynamics:** Traditional linear decoders (e.g., LDA, SVM) applied to raw amplitudes are primarily sensitive to phase-locked *evoked potentials*. In contrast, HeteroRC can robustly and simultaneously decode information embedded in **induced oscillatory power, inter-site phase synchronization (ISPC), and aperiodic spectral modulations (slope/intercept)** .
+3. 🪶 **Lightweight & Data-Efficient:** Unlike heavy CNN- or RNN-based deep learning algorithms, HeteroRC requires no gradient-based backpropagation through time. It runs effortlessly on a standard laptop CPU. This extreme efficiency makes it perfectly suited for cognitive neuroscience studies characterized by **small sample sizes and limited trial counts** .
 
 ---
 
 ## 🌟 Key Features
 
-* **Multiscale Temporal Integration**: Reservoir units are endowed with heterogeneous intrinsic time constants sampled from a log-normal distribution, enabling simultaneous capture of fast transient responses and slow persistent dynamics.
-* **Raw Data Processing**: Decodes evoked responses, induced oscillatory power, phase synchrony, and aperiodic modulations directly from raw multichannel time series without manual feature engineering.
-* **White-Box Interpretability**: Utilizes the Haufe transform and hierarchical clustering to open the recurrent "black box," extracting interpretable temporal (ERP), spectral (TFR/PSD), and spatial (Topomap) motifs.
-* **Group-Level Inference**: Implements a novel *Sensor-Space Matching* and *Sign-Alignment* approach to identify consistent, population-level neural motifs across idiosyncratic, randomly initialized individual reservoirs.
+* **Time-Series Decoding:** Performs robust time-resolved cross-validation decoding directly on raw multichannel data, accurately pinpointing when task-relevant information emerges .
+* **Cross-Temporal Generalization:** Computes Temporal Generalization Matrices (TGMs) by training and testing across all time points, revealing whether neural representations are dynamically evolving or temporally stable .
+* **Cross-Task/Condition/Session Generalization:** Provides dedicated pipelines for rigorous independent train/test evaluations. Seamlessly supports scenarios where models are trained on one session, task, or condition and evaluated on a completely independent dataset .
+* **Individual-Level Interpretability:** Avoids the "black box" problem. By converting uninterpretable classifier weights into activation patterns via the Haufe Transform, it automatically extracts latent virtual source signals and evaluates them across temporal (ERPs), spectral (TFRs, FOOOF-parameterized PSDs), and spatial (Topomaps) domains .
+* **Group-Level Inference:** Features a novel sensor-space matching and sign-alignment algorithm. It projects idiosyncratic reservoir latent activities back to a common physical EEG sensor space, enabling global spatial clustering and the reconstruction of Grand-Average neural motifs across multiple participants .
 
 ---
 
