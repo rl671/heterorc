@@ -21,23 +21,15 @@ Unlike standard linear decoders that require extensive pre-filtering or rigid ph
 
 The repository is logically divided into core functional modules and experiment scripts used to reproduce the figures in the manuscript.
 
-### `src/` - Core Framework
+### Core Framework
 - `heterorc.py`: The core Heterogeneous Reservoir Computing network, including modules for strictly isolated cross-validation and temporal smoothing.
 - `heterorc_interpretation.py`: The two-level interpretation framework (Individual & Group-level), containing Haufe transforms, dynamic clustering, and multi-domain visualizations (ERPs, TFRs, PSDs, Topomaps).
 - `simulate_eeg.py`: A robust EEG simulator capable of generating ERPs, induced power modulations, inter-site phase clustering (ISPC), and 1/f aperiodic shifts.
 
-### `scripts/` - Reproducing Paper Figures
+### `paper_scripts/` - Reproducing Paper Figures
 - **Figure 2**: Simulation benchmarking against LDA/SVM (`Fig2_RC_time_decoding.py`, `Fig2_Simulation_univariate.py`).
 - **Figure 3**: Cross-temporal generalization (CTG) and individual interpretation on the **BCI Competition IV-2a** dataset.
 - **Figure 4**: Time-resolved decoding and individual latent dynamics on the **Attentional Priority** dataset.
 - **Figure 5**: Group-level interpretation via sensor-space matching for both BCI and Attentional Priority datasets.
 - **Figure S2**: Performance comparison against Wavelet and Filter-Hilbert transformations (`FigS2_Wavelet_cmp_simu.py`).
 
----
-
-## ⚙️ Installation & Requirements
-
-1. Clone this repository:
-   ```bash
-   git clone [https://github.com/rl671/heterorc.git](https://github.com/rl671/heterorc.git)
-   cd heterorc
