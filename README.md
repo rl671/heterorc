@@ -5,6 +5,8 @@
 
 Welcome to the official repository for **HeteroRC**, a biologically inspired and interpretable decoding framework for dynamic neural responses (EEG/MEG/LFPs).
 
+Preprint is now available: https://www.biorxiv.org/content/10.64898/2026.04.04.716475v1
+
 HeteroRC is designed to overcome the core limitations of conventional decoding pipelines in cognitive neuroscience, offering three major advantages :
 
 1. ⚡ **Direct Decoding on Raw Time-Series:** It operates strictly on raw, multichannel time-series data. Absolutely no prior transformation, frequency filtering, or manual feature engineering is required. 
@@ -59,13 +61,14 @@ We provide three interactive Jupyter Notebooks to help you integrate HeteroRC in
 
 ## 📖 Citation
 
-If you use HeteroRC or the associated interpretability framework in your research, please cite our paper:
+If you use HeteroRC or the associated interpretability framework in your research, please cite our paper ([DOI: 10.64898/2026.04.04.716475](https://doi.org/10.64898/2026.04.04.716475)):
 
 ```bibtex
 @article{Lu2026HeteroRC,
   title={HeteroRC: Decoding latent information from dynamic neural responses with interpretable heterogeneous reservoir computing},
   author={Lu, Runhao and Liu, Sichao and Liu, Yanan and Duncan, John and Henson, Richard N. and Woolgar, Alexandra},
   journal={bioRxiv},
-  year={2026}
+  year={2026},
+  doi={10.64898/2026.04.04.716475}
 }
 ```
