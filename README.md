@@ -11,7 +11,7 @@ HeteroRC is designed to overcome the core limitations of conventional decoding p
 
 1. ⚡ **Direct Decoding on Raw Time-Series:** It operates strictly on raw, multichannel time-series data. No prior transformation, narrow-band filtering, or manual feature engineering is required. 
 2. 🧠 **Sensitivity to Diverse Neural Dynamics:** Traditional linear decoders (e.g., LDA, SVM) applied to raw amplitudes are primarily sensitive to phase-locked *evoked potentials*. In contrast, HeteroRC can robustly and simultaneously decode information embedded in **induced oscillatory power, inter-site phase synchronization (ISPC), and aperiodic spectral modulations (slope/intercept)** .
-3. 🪶 **Lightweight & Data-Efficient:** Unlike heavy CNN- or RNN-based deep learning algorithms, HeteroRC requires no gradient-based backpropagation through time. It runs effortlessly on a standard laptop CPU. This extreme efficiency makes it perfectly suited for cognitive neuroscience studies characterized by **small sample sizes and limited trial counts** .
+3. 🪶 **Lightweight & Data-Efficient:** Unlike heavy CNN- or RNN-based deep learning algorithms, HeteroRC requires no gradient-based backpropagation through time. It runs effortlessly on a standard laptop CPU. This  efficiency makes it well suited for cognitive neuroscience studies characterized by **small sample sizes and limited trial counts** .
 
 ---
 
