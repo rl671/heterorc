@@ -66,6 +66,7 @@ If you use HeteroRC or the associated interpretability framework in your researc
   title={HeteroRC: Decoding latent information from dynamic neural responses with interpretable heterogeneous reservoir computing},
   author={Lu, Runhao and Liu, Sichao and Liu, Yanan and Duncan, John and Henson, Richard N. and Woolgar, Alexandra},
   journal={bioRxiv},
-  year={2026}
+  year={2026},
+  doi={10.64898/2026.04.04.716475}
 }
 ```
