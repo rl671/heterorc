@@ -9,7 +9,7 @@ Preprint is now available: https://www.biorxiv.org/content/10.64898/2026.04.04.7
 
 HeteroRC is designed to overcome the core limitations of conventional decoding pipelines in cognitive neuroscience, offering three major advantages :
 
-1. ⚡ **Direct Decoding on Raw Time-Series:** It operates strictly on raw, multichannel time-series data. Absolutely no prior transformation, frequency filtering, or manual feature engineering is required. 
+1. ⚡ **Direct Decoding on Raw Time-Series:** It operates strictly on raw, multichannel time-series data. No prior transformation, narrow-band filtering, or manual feature engineering is required. 
 2. 🧠 **Sensitivity to Diverse Neural Dynamics:** Traditional linear decoders (e.g., LDA, SVM) applied to raw amplitudes are primarily sensitive to phase-locked *evoked potentials*. In contrast, HeteroRC can robustly and simultaneously decode information embedded in **induced oscillatory power, inter-site phase synchronization (ISPC), and aperiodic spectral modulations (slope/intercept)** .
 3. 🪶 **Lightweight & Data-Efficient:** Unlike heavy CNN- or RNN-based deep learning algorithms, HeteroRC requires no gradient-based backpropagation through time. It runs effortlessly on a standard laptop CPU. This extreme efficiency makes it perfectly suited for cognitive neuroscience studies characterized by **small sample sizes and limited trial counts** .
 
@@ -55,7 +55,7 @@ cd heterorc
 
 We provide three interactive Jupyter Notebooks to help you integrate HeteroRC into your own analytical pipelines:
 
-1. **`Tutorial1_decoding_with_HeteroRC.ipynb`**: Start here. Uses `simulate_eeg.py` to generate controlled neural dynamics. Demonstrates why standard linear decoders fail on non-phase-locked signals and how to configure HeteroRC for robust time-resolved and cross-temporal generalization decoding.
+1. **`Tutorial1_decoding_with_HeteroRC.ipynb`**: Start here. Uses `simulate_eeg.py` to generate controlled neural dynamics. Demonstrates how to configure HeteroRC for robust time-resolved and cross-temporal/cross-task generalization decoding.
 2. **`Tutorial2_individual_level_interpretation.ipynb`**: Applies HeteroRC to real EEG data (Motor Imagery). Demonstrates strict cross-validation for peak selection and uses `analyze_dynamics` to extract idiosyncratic virtual sources, ERPs, TFRs, and Topomaps.
 3. **`Tutorial3_group_level_interpretation.ipynb`**: Demonstrates the `analyze_dynamics_group` function. Shows how to project individual reservoir nodes to a common sensor space, perform spatial clustering, and extract Grand-Average neural dynamics for cross-subject statistical testing.
 
