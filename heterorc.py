@@ -5,6 +5,12 @@
 4. cross_temporal_decoding_heterorc
 5. cross_generalisation_train_test_heterorc
 
+Updates (v0.260411):
+- Initialization: using ARPACK (scipy.sparse.linalg.eigs) for 
+  spectral radius estimation, reducing complexity from O(N^3) to O(N^2).
+- Transform: Optimized via Sparse CSR, memory contiguity, and local caching.
+- This update will largely reduce running time especially when n_res is large.
+
 Author: Runhao Lu, Jan 2026"""
 
 import numpy as np
@@ -127,17 +133,33 @@ class HeteroRC:
         # Input weights: dense, uniform in [-input_scaling, +input_scaling]
         self.W_in = (self.rng.rand(self.n_res, self.n_in) * 2.0 - 1.0) * input_scaling
 
-        # Reservoir weights: sparse random graph, then scale to desired spectral radius
-        W_res = self.rng.rand(self.n_res, self.n_res) - 0.5  # uniform in [-0.5, 0.5]
-        mask = (self.rng.rand(self.n_res, self.n_res) <= 0.1)  # keep ~10% connections
-        W_res *= mask
+        W_res_dense = self.rng.rand(self.n_res, self.n_res) - 0.5  # uniform in [-0.5, 0.5]
+        mask = (self.rng.rand(self.n_res, self.n_res) <= 0.1) # keep ~10% connections
+        W_res_dense *= mask
+        
+        # ---------------------------------------------------------------------
+        # [v0.260411 Revision] Core Computational Optimization:
+        # Convert the dense matrix to a CSR sparse format and use the ARPACK 
+        # iterative method (splinalg.eigs) to compute ONLY the largest magnitude 
+        # eigenvalue. This reduces the eigenvalue computation complexity from 
+        # O(N^3) to O(N^2), drastically cutting down initialization time for large n_res.
+        # ---------------------------------------------------------------------
+        W_res_sparse = sparse.csr_matrix(W_res_dense)
 
-        # Spectral radius normalization (can be expensive for large n_res)
-        radius = np.max(np.abs(np.linalg.eigvals(W_res)))
-        self.W_res = W_res * (spectral_radius / (radius if radius > 0 else 1.0))
+        try:
+            # return_eigenvectors=False further saves memory and time
+            eigenvalues = splinalg.eigs(W_res_sparse, k=1, which='LM', return_eigenvectors=False)
+            radius = np.max(np.abs(eigenvalues))
+        except splinalg.ArpackNoConvergence:
+            # Safe fallback in the extremely rare case that the iteration does not converge
+            radius = 1.0
+
+        # The final W_res is a highly memory-efficient CSR sparse matrix supporting fast multiplication
+        self.W_res = W_res_sparse * (spectral_radius / (radius if radius > 0 else 1.0))
 
         # Bias term per unit
         self.bias = (self.rng.rand(self.n_res) * 2.0 - 1.0) * bias_scaling  # (n_res,)
+        
 
     def transform(self, X_seq):
         """
@@ -165,41 +187,62 @@ class HeteroRC:
 
         # Pre-transpose for faster GEMM patterns
         Win_T = self.W_in.T   # (n_in, n_res)
-        Wres_T = self.W_res.T # (n_res, n_res)
+        # ---------------------------------------------------------------------
+        # [v0.260411 Revision] Memory & Instruction Optimization:
+        # Force conversion to CSR format after transpose. CSR is the fastest 
+        # format when multiplied from the left by a dense matrix (x @ Wres_T).
+        # ---------------------------------------------------------------------
+        Wres_T = self.W_res.T.tocsr()
+        
+        leak = self.leak
+        leak_inv = 1.0 - self.leak
+        bias = self.bias
+       
+        
+        # ---------------------------------------------------------------------
+        # [v0.260411 Revision] Memory & Instruction Optimization:
+        # Pre-allocate memory using a Time-first layout. 
+        # This ensures that the write operations inside the time loop (states_fwd_t[t] = x) 
+        # are contiguous in physical memory (Cache-friendly). 
+        # After the loop, transpose is used to restore the view with zero overhead.
+        # ---------------------------------------------------------------------
+        states_fwd_t = np.zeros((n_times, n_trials, self.n_res), dtype=float)
+        x = np.zeros((n_trials, self.n_res), dtype=float)
 
         # -------------------------
         # Forward pass
         # -------------------------
-        states_fwd = np.zeros((n_trials, self.n_res, n_times), dtype=float)
-        x = np.zeros((n_trials, self.n_res), dtype=float)
-
+        # states_fwd = np.zeros((n_trials, self.n_res, n_times), dtype=float)
+        # x = np.zeros((n_trials, self.n_res), dtype=float)
         for t in range(n_times):
-            # u: input drive, r: recurrent drive
-            u = X_seq[:, :, t] @ Win_T          # (n_trials, n_res)
-            r = x @ Wres_T                      # (n_trials, n_res)
-            # Leaky integrator update with heterogeneous leak per unit
-            x = (1.0 - self.leak) * x + self.leak * np.tanh(u + r + self.bias)
-            states_fwd[:, :, t] = x
+            u = X_seq[:, :, t] @ Win_T          
+            r = x @ Wres_T          
+            x = leak_inv * x + leak * np.tanh(u + r + bias)
+    
+            states_fwd_t[t] = x
+      
+        states_fwd = states_fwd_t.transpose(1, 2, 0)
 
         if not self.bidirectional:
             return states_fwd
-
+     
         # -------------------------
         # Backward pass (time-reversed input)
         # -------------------------
         X_rev = np.flip(X_seq, axis=2)
-        states_bwd_rev = np.zeros((n_trials, self.n_res, n_times), dtype=float)
+        states_bwd_rev_t = np.zeros((n_times, n_trials, self.n_res), dtype=float)
         x = np.zeros((n_trials, self.n_res), dtype=float)
-
+        
         for t in range(n_times):
             u = X_rev[:, :, t] @ Win_T
             r = x @ Wres_T
-            x = (1.0 - self.leak) * x + self.leak * np.tanh(u + r + self.bias)
-            states_bwd_rev[:, :, t] = x
+            x = leak_inv * x + leak * np.tanh(u + r + bias)
+            states_bwd_rev_t[t] = x
 
-        # Flip back to align with original time index
+        # First transpose back to normal view, then flip along the time axis (axis=2)
+        states_bwd_rev = states_bwd_rev_t.transpose(1, 2, 0)
         states_bwd = np.flip(states_bwd_rev, axis=2)
-
+        
         # -------------------------
         # Merge forward/backward representations
         # -------------------------
