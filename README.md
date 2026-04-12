@@ -7,6 +7,8 @@ Welcome to the official repository for **HeteroRC**, a biologically inspired and
 
 Preprint is now available: https://www.biorxiv.org/content/10.64898/2026.04.04.716475v1
 
+*** Update: heterorc.py (v0.260411): Optimized HeteroRC for speed; drastically reduced computation time for large n_res through algorithmic and memory-level refinements. ***
+
 HeteroRC is designed to overcome the core limitations of conventional decoding pipelines in cognitive neuroscience, offering three major advantages :
 
 1. ⚡ **Direct Decoding on Raw Time-Series:** It operates strictly on raw, multichannel time-series data. No prior transformation, narrow-band filtering, or manual feature engineering is required. 
