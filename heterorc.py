@@ -19,6 +19,8 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import RidgeClassifierCV
 from sklearn.metrics import roc_auc_score
+import scipy.sparse as sparse
+import scipy.sparse.linalg as splinalg
 
 class HeteroRC:
     """
